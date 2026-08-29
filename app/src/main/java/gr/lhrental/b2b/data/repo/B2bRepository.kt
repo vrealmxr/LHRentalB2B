@@ -6,6 +6,7 @@ import gr.lhrental.b2b.data.local.TokenStore
 import gr.lhrental.b2b.data.model.ApiEnvelope
 import gr.lhrental.b2b.data.model.ApiErrorBody
 import gr.lhrental.b2b.data.model.Category
+import gr.lhrental.b2b.data.model.ChangePasswordRequest
 import gr.lhrental.b2b.data.model.ProductAvailability
 import gr.lhrental.b2b.data.model.CreateOrderRequest
 import gr.lhrental.b2b.data.model.CreatedOrder
@@ -14,6 +15,7 @@ import gr.lhrental.b2b.data.model.OrderDetail
 import gr.lhrental.b2b.data.model.OrderSummary
 import gr.lhrental.b2b.data.model.Pagination
 import gr.lhrental.b2b.data.model.Product
+import gr.lhrental.b2b.data.model.UpdateProfileRequest
 import gr.lhrental.b2b.data.model.User
 import gr.lhrental.b2b.data.network.ApiService
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +84,12 @@ class B2bRepository(
 
     suspend fun invoices(): ApiResult<List<Invoice>> =
         unwrap(safeCall { api.invoices() }) { it.invoices }
+
+    suspend fun updateProfile(request: UpdateProfileRequest): ApiResult<User> =
+        unwrap(safeCall { api.updateProfile(request) }) { it.user }
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): ApiResult<Unit> =
+        unwrap(safeCall { api.changePassword(ChangePasswordRequest(currentPassword, newPassword)) }) { }
 
     /**
      * Downloads one invoice PDF through the authenticated OkHttp client

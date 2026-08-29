@@ -55,6 +55,30 @@ data class User(
 @JsonClass(generateAdapter = true)
 data class UserEnvelopeData(val user: User)
 
+/**
+ * Every field optional — account/update.php only touches whatever keys are
+ * actually present in the JSON body, so building this with only the
+ * changed fields set (rest null) leaves everything else untouched.
+ */
+@JsonClass(generateAdapter = true)
+data class UpdateProfileRequest(
+    @Json(name = "company_name") val companyName: String? = null,
+    val email: String? = null,
+    @Json(name = "vat_number") val vatNumber: Int? = null,
+    val address: String? = null,
+    val city: String? = null,
+    val postcode: Int? = null,
+    val country: String? = null,
+    @Json(name = "phone_number") val phoneNumber: String? = null,
+    val profession: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class ChangePasswordRequest(
+    @Json(name = "current_password") val currentPassword: String,
+    @Json(name = "new_password") val newPassword: String,
+)
+
 @JsonClass(generateAdapter = true)
 data class CategoriesData(val categories: List<Category>)
 

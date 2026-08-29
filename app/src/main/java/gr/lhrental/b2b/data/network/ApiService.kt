@@ -3,6 +3,7 @@ package gr.lhrental.b2b.data.network
 import gr.lhrental.b2b.data.model.ApiEnvelope
 import gr.lhrental.b2b.data.model.AvailabilityData
 import gr.lhrental.b2b.data.model.CategoriesData
+import gr.lhrental.b2b.data.model.ChangePasswordRequest
 import gr.lhrental.b2b.data.model.CreateOrderRequest
 import gr.lhrental.b2b.data.model.CreatedOrderData
 import gr.lhrental.b2b.data.model.InvoicesData
@@ -11,6 +12,7 @@ import gr.lhrental.b2b.data.model.OrderDetailData
 import gr.lhrental.b2b.data.model.OrdersData
 import gr.lhrental.b2b.data.model.ProductData
 import gr.lhrental.b2b.data.model.ProductsData
+import gr.lhrental.b2b.data.model.UpdateProfileRequest
 import gr.lhrental.b2b.data.model.UserEnvelopeData
 import retrofit2.Response
 import retrofit2.http.Body
@@ -74,4 +76,10 @@ interface ApiService {
 
     @GET("invoices/index.php")
     suspend fun invoices(): Response<ApiEnvelope<InvoicesData>>
+
+    @POST("account/update.php")
+    suspend fun updateProfile(@Body body: UpdateProfileRequest): Response<ApiEnvelope<UserEnvelopeData>>
+
+    @POST("account/change_password.php")
+    suspend fun changePassword(@Body body: ChangePasswordRequest): Response<ApiEnvelope<Map<String, Boolean>>>
 }

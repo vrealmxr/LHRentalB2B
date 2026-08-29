@@ -3,17 +3,21 @@ package gr.lhrental.b2b.ui.screens.account
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,11 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import gr.lhrental.b2b.R
 import gr.lhrental.b2b.data.model.Invoice
+import gr.lhrental.b2b.data.model.User
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 
@@ -65,48 +72,206 @@ fun AccountScreen(
             return@Scaffold
         }
 
-        Column(modifier = Modifier.padding(padding).fillMaxSize().padding(20.dp)) {
-            viewModel.user?.let { user ->
-                Text(user.companyName ?: user.username, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                Text(user.email.orEmpty(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                user.phoneNumber?.takeIf { it.isNotBlank() }?.let {
-                    Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                user.discountPercent?.let {
-                    Text("Έκπτωση: $it%", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 6.dp))
-                }
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-            Text(stringResource(R.string.account_invoices), style = MaterialTheme.typography.titleMedium)
-
-            if (viewModel.invoices.isEmpty()) {
-                Text(
-                    "Δεν υπάρχουν τιμολόγια.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(viewModel.invoices, key = { it.id }) { invoice ->
-                        InvoiceRow(
-                            invoice = invoice,
-                            isDownloading = viewModel.downloadingInvoiceId == invoice.id,
-                            onDownload = { viewModel.downloadInvoice(invoice) },
-                        )
+        LazyColumn(
+            modifier = Modifier.padding(padding).fillMaxSize(),
+            contentPadding = PaddingValues(20.dp),
+        ) {
+            item {
+                val user = viewModel.user
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = user?.companyName?.takeIf { it.isNotBlank() } ?: user?.username.orEmpty(),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    if (!viewModel.isEditing) {
+                        TextButton(onClick = viewModel::startEditing) { Text("Επεξεργασία") }
                     }
                 }
             }
 
-            viewModel.errorMessage?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+            item {
+                if (viewModel.isEditing) {
+                    EditProfileForm(viewModel)
+                } else if (viewModel.user != null) {
+                    ProfileDetails(viewModel.user!!)
+                }
             }
 
-            TextButton(onClick = viewModel::logout, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-                Text(stringResource(R.string.account_logout), color = MaterialTheme.colorScheme.error)
+            item {
+                TextButton(onClick = viewModel::openChangePassword, modifier = Modifier.padding(top = 4.dp)) {
+                    Text("Αλλαγή κωδικού πρόσβασης")
+                }
+                HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 20.dp))
+                Text(stringResource(R.string.account_invoices), style = MaterialTheme.typography.titleMedium)
+            }
+
+            if (viewModel.invoices.isEmpty()) {
+                item {
+                    Text(
+                        "Δεν υπάρχουν τιμολόγια.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            } else {
+                items(viewModel.invoices, key = { it.id }) { invoice ->
+                    InvoiceRow(
+                        invoice = invoice,
+                        isDownloading = viewModel.downloadingInvoiceId == invoice.id,
+                        onDownload = { viewModel.downloadInvoice(invoice) },
+                    )
+                }
+            }
+
+            item {
+                viewModel.errorMessage?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                }
+                TextButton(onClick = viewModel::logout, modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+                    Text(stringResource(R.string.account_logout), color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
+
+    if (viewModel.showChangePassword) {
+        ChangePasswordDialog(viewModel)
+    }
+}
+
+@Composable
+private fun ProfileDetails(user: User) {
+    Column(modifier = Modifier.padding(top = 12.dp)) {
+        DetailRow("Όνομα χρήστη", user.username)
+        DetailRow("Email", user.email)
+        DetailRow("Τηλέφωνο", user.phoneNumber)
+        DetailRow("Επάγγελμα / Δραστηριότητα", user.profession)
+        DetailRow("Α.Φ.Μ.", user.vatNumber?.takeIf { it != 0 }?.toString())
+        DetailRow("Διεύθυνση", user.address)
+        DetailRow("Πόλη", user.city)
+        DetailRow("Τ.Κ.", user.postcode?.takeIf { it != 0 }?.toString())
+        DetailRow("Χώρα", user.country)
+        user.discountPercent?.let { DetailRow("Έκπτωση", "$it%") }
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String?) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            value?.takeIf { it.isNotBlank() } ?: "—",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
+@Composable
+private fun EditProfileForm(viewModel: AccountViewModel) {
+    Column(modifier = Modifier.padding(top = 12.dp)) {
+        FormField("Επωνυμία εταιρείας", viewModel.form.companyName) { viewModel.form.companyName = it }
+        FormField("Email", viewModel.form.email, keyboardType = KeyboardType.Email) { viewModel.form.email = it }
+        FormField("Τηλέφωνο", viewModel.form.phoneNumber, keyboardType = KeyboardType.Phone) { viewModel.form.phoneNumber = it }
+        FormField("Επάγγελμα / Δραστηριότητα", viewModel.form.profession) { viewModel.form.profession = it }
+        FormField("Α.Φ.Μ.", viewModel.form.vatNumber, keyboardType = KeyboardType.Number) { viewModel.form.vatNumber = it }
+        FormField("Διεύθυνση", viewModel.form.address) { viewModel.form.address = it }
+        FormField("Πόλη", viewModel.form.city) { viewModel.form.city = it }
+        FormField("Τ.Κ.", viewModel.form.postcode, keyboardType = KeyboardType.Number) { viewModel.form.postcode = it }
+        FormField("Χώρα", viewModel.form.country) { viewModel.form.country = it }
+
+        viewModel.saveError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+        }
+
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = viewModel::cancelEditing, modifier = Modifier.weight(1f), enabled = !viewModel.isSaving) {
+                Text("Άκυρο")
+            }
+            Button(onClick = viewModel::saveProfile, modifier = Modifier.weight(1f), enabled = !viewModel.isSaving) {
+                if (viewModel.isSaving) CircularProgressIndicator(modifier = Modifier.padding(2.dp)) else Text("Αποθήκευση")
+            }
+        }
+    }
+}
+
+@Composable
+private fun FormField(
+    label: String,
+    value: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(label) },
+        singleLine = true,
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = keyboardType),
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+    )
+}
+
+@Composable
+private fun ChangePasswordDialog(viewModel: AccountViewModel) {
+    AlertDialog(
+        onDismissRequest = viewModel::dismissChangePassword,
+        title = { Text("Αλλαγή κωδικού πρόσβασης") },
+        text = {
+            if (viewModel.passwordChanged) {
+                Text("Ο κωδικός σας άλλαξε με επιτυχία.")
+            } else {
+                Column {
+                    OutlinedTextField(
+                        value = viewModel.currentPassword,
+                        onValueChange = viewModel::onCurrentPasswordChange,
+                        label = { Text("Τρέχων κωδικός") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = viewModel.newPassword,
+                        onValueChange = viewModel::onNewPasswordChange,
+                        label = { Text("Νέος κωδικός") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                    OutlinedTextField(
+                        value = viewModel.confirmPassword,
+                        onValueChange = viewModel::onConfirmPasswordChange,
+                        label = { Text("Επιβεβαίωση νέου κωδικού") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                    viewModel.passwordError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (viewModel.passwordChanged) {
+                TextButton(onClick = viewModel::dismissChangePassword) { Text("Κλείσιμο") }
+            } else {
+                TextButton(onClick = viewModel::submitPasswordChange, enabled = !viewModel.isChangingPassword) {
+                    Text("Αλλαγή")
+                }
+            }
+        },
+        dismissButton = {
+            if (!viewModel.passwordChanged) {
+                TextButton(onClick = viewModel::dismissChangePassword) { Text("Άκυρο") }
+            }
+        },
+    )
 }
 
 @Composable

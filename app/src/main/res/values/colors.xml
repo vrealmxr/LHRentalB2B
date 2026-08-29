@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pulled from the live b2b/css/mainv2.css palette (slate ink + orange accent). -->
+    <color name="lh_ink">#0F172A</color>
+    <color name="lh_ink_soft">#475569</color>
+    <color name="lh_surface">#FFFFFF</color>
+    <color name="lh_background">#F9FAFB</color>
+    <color name="lh_border">#E5E7EB</color>
+    <color name="lh_orange">#F97316</color>
+    <color name="lh_orange_dark">#EA580C</color>
+    <color name="lh_orange_light">#FFB37A</color>
+    <color name="lh_danger">#DC2626</color>
+    <color name="lh_success">#16A34A</color>
+</resources>

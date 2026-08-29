@@ -28,8 +28,6 @@
     <string name="checkout_title">Στοιχεία εκδήλωσης</string>
     <string name="checkout_project_title">Τίτλος εκδήλωσης</string>
     <string name="checkout_event_type">Τύπος εκδήλωσης</string>
-    <string name="checkout_date_start">Ημερομηνία παραλαβής</string>
-    <string name="checkout_date_return">Ημερομηνία επιστροφής</string>
     <string name="checkout_location">Τοποθεσία</string>
     <string name="checkout_address">Διεύθυνση παράδοσης</string>
     <string name="checkout_town">Πόλη</string>

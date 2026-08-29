@@ -28,7 +28,7 @@ public class ProductJsonAdapter(
   private val options: JsonReader.Options = JsonReader.Options.of("id", "sku", "name",
       "description", "dimensions", "pieces", "category_id", "image_url", "price", "is_waterproof",
       "is_transferable", "is_sunproof", "has_people_capacity", "people_capacity", "on_outlet",
-      "outlet_price")
+      "outlet_price", "available_quantity")
 
   private val intAdapter: JsonAdapter<Int> = moshi.adapter(Int::class.java, emptySet(), "id")
 
@@ -73,6 +73,7 @@ public class ProductJsonAdapter(
     var peopleCapacity: Int? = 0
     var onOutlet: Boolean? = null
     var outletPrice: Double? = null
+    var availableQuantity: Int? = null
     var mask0 = -1
     reader.beginObject()
     while (reader.hasNext()) {
@@ -134,6 +135,11 @@ public class ProductJsonAdapter(
         14 -> onOutlet = booleanAdapter.fromJson(reader) ?: throw Util.unexpectedNull("onOutlet",
             "on_outlet", reader)
         15 -> outletPrice = nullableDoubleAdapter.fromJson(reader)
+        16 -> {
+          availableQuantity = nullableIntAdapter.fromJson(reader)
+          // $mask = $mask and (1 shl 16).inv()
+          mask0 = mask0 and 0xfffeffff.toInt()
+        }
         -1 -> {
           // Unknown name, skip it.
           reader.skipName()
@@ -142,7 +148,7 @@ public class ProductJsonAdapter(
       }
     }
     reader.endObject()
-    if (mask0 == 0xffffc1c7.toInt()) {
+    if (mask0 == 0xfffec1c7.toInt()) {
       // All parameters with defaults are set, invoke the constructor directly
       return  Product(
           id = id ?: throw Util.missingProperty("id", "id", reader),
@@ -161,7 +167,8 @@ public class ProductJsonAdapter(
           hasPeopleCapacity = hasPeopleCapacity as Boolean,
           peopleCapacity = peopleCapacity as Int,
           onOutlet = onOutlet ?: throw Util.missingProperty("onOutlet", "on_outlet", reader),
-          outletPrice = outletPrice
+          outletPrice = outletPrice,
+          availableQuantity = availableQuantity
       )
     } else {
       // Reflectively invoke the synthetic defaults constructor
@@ -173,7 +180,7 @@ public class ProductJsonAdapter(
           Double::class.javaPrimitiveType, Boolean::class.javaPrimitiveType,
           Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType,
           Boolean::class.javaPrimitiveType, Int::class.javaPrimitiveType,
-          Boolean::class.javaPrimitiveType, Double::class.javaObjectType,
+          Boolean::class.javaPrimitiveType, Double::class.javaObjectType, Int::class.javaObjectType,
           Int::class.javaPrimitiveType, Util.DEFAULT_CONSTRUCTOR_MARKER).also {
           this.constructorRef = it }
       return localConstructor.newInstance(
@@ -193,6 +200,7 @@ public class ProductJsonAdapter(
           peopleCapacity,
           onOutlet ?: throw Util.missingProperty("onOutlet", "on_outlet", reader),
           outletPrice,
+          availableQuantity,
           mask0,
           /* DefaultConstructorMarker */ null
       )
@@ -236,6 +244,8 @@ public class ProductJsonAdapter(
     booleanAdapter.toJson(writer, value_.onOutlet)
     writer.name("outlet_price")
     nullableDoubleAdapter.toJson(writer, value_.outletPrice)
+    writer.name("available_quantity")
+    nullableIntAdapter.toJson(writer, value_.availableQuantity)
     writer.endObject()
   }
 }

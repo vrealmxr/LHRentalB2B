@@ -5,6 +5,7 @@ import gr.lhrental.b2b.data.local.TokenStore
 import gr.lhrental.b2b.data.network.NetworkModule
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.data.repo.CartStore
+import gr.lhrental.b2b.data.repo.EventDatesStore
 
 /**
  * Hand-rolled service locator — no DI framework yet. Fine at this size;
@@ -19,6 +20,7 @@ class LhB2bApplication : Application() {
         private set
 
     val cartStore = CartStore()
+    val eventDatesStore = EventDatesStore()
 
     override fun onCreate() {
         super.onCreate()

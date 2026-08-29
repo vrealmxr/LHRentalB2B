@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -32,8 +31,10 @@ import androidx.navigation.NavType
 import gr.lhrental.b2b.R
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.data.repo.CartStore
+import gr.lhrental.b2b.data.repo.EventDatesStore
 import gr.lhrental.b2b.ui.screens.account.AccountScreen
 import gr.lhrental.b2b.ui.screens.auth.LoginScreen
+import gr.lhrental.b2b.ui.screens.dates.DatesScreen
 
 private data class BottomTab(val destination: Destination, val label: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
@@ -48,10 +49,15 @@ private val bottomTabs = listOf(
 fun LhNavGraph(
     repository: B2bRepository,
     cartStore: CartStore,
+    eventDatesStore: EventDatesStore,
     startLoggedIn: Boolean,
 ) {
     val navController = rememberNavController()
-    val startDestination = if (startLoggedIn) Destination.Catalog.route else Destination.Login.route
+    val startDestination = when {
+        !startLoggedIn -> Destination.Login.route
+        eventDatesStore.dates.collectAsState().value == null -> Destination.Dates.route
+        else -> Destination.Catalog.route
+    }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination
@@ -93,15 +99,25 @@ fun LhNavGraph(
             NavHost(navController = navController, startDestination = startDestination) {
                 composable(Destination.Login.route) {
                     LoginScreen(repository = repository, onLoggedIn = {
-                        navController.navigate(Destination.Catalog.route) {
+                        navController.navigate(Destination.Dates.route) {
                             popUpTo(Destination.Login.route) { inclusive = true }
                         }
                     })
                 }
+                composable(Destination.Dates.route) {
+                    DatesScreen(eventDatesStore = eventDatesStore, onConfirmed = {
+                        navController.navigate(Destination.Catalog.route) {
+                            popUpTo(Destination.Dates.route) { inclusive = true }
+                        }
+                    })
+                }
                 composable(Destination.Catalog.route) {
-                    gr.lhrental.b2b.ui.screens.catalog.CatalogScreen(repository = repository) { product ->
-                        navController.navigate(Destination.ProductDetail.of(product.id))
-                    }
+                    gr.lhrental.b2b.ui.screens.catalog.CatalogScreen(
+                        repository = repository,
+                        eventDatesStore = eventDatesStore,
+                        onEditDates = { navController.navigate(Destination.Dates.route) },
+                        onProductClick = { product -> navController.navigate(Destination.ProductDetail.of(product.id)) },
+                    )
                 }
                 composable(
                     Destination.ProductDetail.route,
@@ -111,19 +127,24 @@ fun LhNavGraph(
                     gr.lhrental.b2b.ui.screens.catalog.ProductDetailScreen(
                         repository = repository,
                         cartStore = cartStore,
+                        eventDatesStore = eventDatesStore,
                         productId = productId,
                         onBack = { navController.popBackStack() },
                     )
                 }
                 composable(Destination.Cart.route) {
-                    gr.lhrental.b2b.ui.screens.cart.CartScreen(cartStore = cartStore) {
-                        navController.navigate(Destination.Checkout.route)
-                    }
+                    gr.lhrental.b2b.ui.screens.cart.CartScreen(
+                        cartStore = cartStore,
+                        eventDatesStore = eventDatesStore,
+                        onEditDates = { navController.navigate(Destination.Dates.route) },
+                        onCheckout = { navController.navigate(Destination.Checkout.route) },
+                    )
                 }
                 composable(Destination.Checkout.route) {
                     gr.lhrental.b2b.ui.screens.cart.CheckoutScreen(
                         repository = repository,
                         cartStore = cartStore,
+                        eventDatesStore = eventDatesStore,
                         onSubmitted = { orderId ->
                             navController.navigate(Destination.OrderDetail.of(orderId)) {
                                 popUpTo(Destination.Catalog.route)
@@ -149,6 +170,8 @@ fun LhNavGraph(
                 }
                 composable(Destination.Account.route) {
                     AccountScreen(repository = repository, onLoggedOut = {
+                        cartStore.clear()
+                        eventDatesStore.clear()
                         navController.navigate(Destination.Login.route) {
                             popUpTo(0)
                         }

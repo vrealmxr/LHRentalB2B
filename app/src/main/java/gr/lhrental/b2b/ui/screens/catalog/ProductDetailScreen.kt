@@ -34,6 +34,7 @@ import coil.compose.AsyncImage
 import gr.lhrental.b2b.R
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.data.repo.CartStore
+import gr.lhrental.b2b.data.repo.EventDatesStore
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,11 +42,12 @@ import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 fun ProductDetailScreen(
     repository: B2bRepository,
     cartStore: CartStore,
+    eventDatesStore: EventDatesStore,
     productId: Int,
     onBack: () -> Unit,
 ) {
     val viewModel: ProductDetailViewModel = viewModel(
-        factory = viewModelFactoryOf { ProductDetailViewModel(repository, cartStore, productId) },
+        factory = viewModelFactoryOf { ProductDetailViewModel(repository, cartStore, eventDatesStore, productId) },
     )
 
     Scaffold(
@@ -81,9 +83,18 @@ fun ProductDetailScreen(
                             Text(
                                 text = "${product.effectivePrice} €",
                                 style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
+
+                            viewModel.remainingAvailable?.let { available ->
+                                Text(
+                                    text = if (available > 0) "$available διαθέσιμα για τις επιλεγμένες ημερομηνίες" else "Μη διαθέσιμο για τις επιλεγμένες ημερομηνίες",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = if (available > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(top = 6.dp),
+                                )
+                            }
+
                             product.dimensions?.let {
                                 Text("Διαστάσεις: $it", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 12.dp))
                             }
@@ -91,22 +102,29 @@ fun ProductDetailScreen(
                                 Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 12.dp))
                             }
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.padding(top = 24.dp),
-                            ) {
-                                OutlinedButton(onClick = viewModel::decrement) { Text("−") }
-                                Text(viewModel.quantity.toString(), style = MaterialTheme.typography.titleMedium)
-                                OutlinedButton(onClick = viewModel::increment) { Text("+") }
+                            if (!viewModel.isSoldOut) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.padding(top = 24.dp),
+                                ) {
+                                    OutlinedButton(onClick = viewModel::decrement) { Text("−") }
+                                    Text(viewModel.quantity.toString(), style = MaterialTheme.typography.titleMedium)
+                                    OutlinedButton(onClick = viewModel::increment) { Text("+") }
+                                }
                             }
 
                             Button(
                                 onClick = viewModel::addToCart,
+                                enabled = !viewModel.isSoldOut,
                                 modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                             ) {
                                 Text(
-                                    if (viewModel.addedToCart) "Προστέθηκε ✓" else stringResource(R.string.product_add_to_cart),
+                                    when {
+                                        viewModel.isSoldOut -> "Μη διαθέσιμο"
+                                        viewModel.addedToCart -> "Προστέθηκε ✓"
+                                        else -> stringResource(R.string.product_add_to_cart)
+                                    },
                                 )
                             }
                         }

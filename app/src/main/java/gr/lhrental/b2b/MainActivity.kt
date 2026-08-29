@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
                         LhNavGraph(
                             repository = app.repository,
                             cartStore = app.cartStore,
+                            eventDatesStore = app.eventDatesStore,
                             startLoggedIn = startLoggedIn,
                         )
                     } else {

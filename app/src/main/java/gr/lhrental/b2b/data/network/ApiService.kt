@@ -1,6 +1,7 @@
 package gr.lhrental.b2b.data.network
 
 import gr.lhrental.b2b.data.model.ApiEnvelope
+import gr.lhrental.b2b.data.model.AvailabilityData
 import gr.lhrental.b2b.data.model.CategoriesData
 import gr.lhrental.b2b.data.model.CreateOrderRequest
 import gr.lhrental.b2b.data.model.CreatedOrderData
@@ -42,10 +43,25 @@ interface ApiService {
         @Query("q") query: String? = null,
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = 24,
+        @Query("date_start") dateStart: String? = null,
+        @Query("date_return") dateReturn: String? = null,
     ): Response<ApiEnvelope<ProductsData>>
 
     @GET("products/show.php")
-    suspend fun product(@Query("id") id: Int, @Query("lang") lang: String): Response<ApiEnvelope<ProductData>>
+    suspend fun product(
+        @Query("id") id: Int,
+        @Query("lang") lang: String,
+        @Query("date_start") dateStart: String? = null,
+        @Query("date_return") dateReturn: String? = null,
+    ): Response<ApiEnvelope<ProductData>>
+
+    /** Bulk re-check for the cart, keyed by a comma-separated id list. */
+    @GET("products/availability.php")
+    suspend fun availability(
+        @Query("ids") ids: String,
+        @Query("date_start") dateStart: String,
+        @Query("date_return") dateReturn: String,
+    ): Response<ApiEnvelope<AvailabilityData>>
 
     @GET("orders/index.php")
     suspend fun orders(): Response<ApiEnvelope<OrdersData>>

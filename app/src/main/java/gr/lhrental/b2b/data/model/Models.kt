@@ -100,6 +100,13 @@ data class Product(
     @Json(name = "people_capacity") val peopleCapacity: Int = 0,
     @Json(name = "on_outlet") val onOutlet: Boolean,
     @Json(name = "outlet_price") val outletPrice: Double?,
+    /**
+     * Present only when the request carried date_start/date_return —
+     * how many are free for exactly that window (see api_reserved_quantities
+     * in the backend). Null means "no dates chosen yet, availability
+     * unknown", never "unlimited".
+     */
+    @Json(name = "available_quantity") val availableQuantity: Int? = null,
 ) {
     /** The price the customer actually pays — outlet price when the item is on outlet. */
     val effectivePrice: Double get() = if (onOutlet && outletPrice != null) outletPrice else price
@@ -107,6 +114,16 @@ data class Product(
 
 @JsonClass(generateAdapter = true)
 data class ProductData(val product: Product)
+
+@JsonClass(generateAdapter = true)
+data class AvailabilityData(val availability: List<ProductAvailability>)
+
+@JsonClass(generateAdapter = true)
+data class ProductAvailability(
+    @Json(name = "product_id") val productId: Int,
+    val exists: Boolean,
+    @Json(name = "available_quantity") val availableQuantity: Int,
+)
 
 @JsonClass(generateAdapter = true)
 data class OrdersData(val orders: List<OrderSummary>)

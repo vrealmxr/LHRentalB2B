@@ -9,9 +9,13 @@ import gr.lhrental.b2b.data.model.Category
 import gr.lhrental.b2b.data.model.Product
 import gr.lhrental.b2b.data.repo.ApiResult
 import gr.lhrental.b2b.data.repo.B2bRepository
+import gr.lhrental.b2b.data.repo.EventDatesStore
 import kotlinx.coroutines.launch
 
-class CatalogViewModel(private val repository: B2bRepository) : ViewModel() {
+class CatalogViewModel(
+    private val repository: B2bRepository,
+    private val eventDatesStore: EventDatesStore,
+) : ViewModel() {
 
     var categories by mutableStateOf<List<Category>>(emptyList())
         private set
@@ -34,6 +38,8 @@ class CatalogViewModel(private val repository: B2bRepository) : ViewModel() {
         private set
     var errorMessage by mutableStateOf<String?>(null)
         private set
+
+    val eventDates get() = eventDatesStore.dates.value
 
     private var page = 1
     private var totalPages = 1
@@ -74,6 +80,9 @@ class CatalogViewModel(private val repository: B2bRepository) : ViewModel() {
 
     fun retry() = loadProducts(reset = true)
 
+    /** Call when the customer changes the event dates from elsewhere in the app. */
+    fun refreshForNewDates() = loadProducts(reset = true)
+
     private fun loadProducts(reset: Boolean) {
         if (reset) {
             page = 1
@@ -83,7 +92,7 @@ class CatalogViewModel(private val repository: B2bRepository) : ViewModel() {
         errorMessage = null
         viewModelScope.launch {
             val query = searchQuery.trim().ifBlank { null }
-            when (val result = repository.products(selectedCategoryId, query, page)) {
+            when (val result = repository.products(selectedCategoryId, query, page, eventDates)) {
                 is ApiResult.Success -> {
                     val (items, pagination) = result.value
                     products = if (reset) items else products + items

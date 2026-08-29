@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.LhRentalB2b" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/lh_ink</item>
-        <item name="android:windowBackground">@color/lh_background</item>
+        <item name="android:statusBarColor">@color/lh_black</item>
+        <item name="android:windowBackground">@color/lh_grey_100</item>
     </style>
 </resources>

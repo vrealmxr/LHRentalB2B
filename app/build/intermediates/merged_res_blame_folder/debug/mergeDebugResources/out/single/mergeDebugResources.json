@@ -4,55 +4,55 @@
         "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/xml/network_security_config.xml"
     },
     {
-        "merged": "gr.lhrental.b2b.app-debug-55:/font_josefin_sans_medium.ttf.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/font/josefin_sans_medium.ttf"
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/font_josefin_sans_medium.ttf.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/font/josefin_sans_medium.ttf"
     },
     {
-        "merged": "gr.lhrental.b2b.app-debug-55:/font_josefin_sans_bold.ttf.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/font/josefin_sans_bold.ttf"
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/font_josefin_sans_regular.ttf.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/font/josefin_sans_regular.ttf"
     },
     {
         "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/drawable_ic_launcher_background.xml.flat",
         "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/drawable/ic_launcher_background.xml"
     },
     {
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/drawable-nodpi_lh_monogram.png.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/drawable-nodpi/lh_monogram.png"
+    },
+    {
+        "merged": "gr.lhrental.b2b.app-debug-55:/drawable_ic_launcher_background.xml.flat",
+        "source": "gr.lhrental.b2b.app-main-57:/drawable/ic_launcher_background.xml"
+    },
+    {
         "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/drawable_ic_launcher_foreground.xml.flat",
         "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/drawable-nodpi_ic_lh_logo.png.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/drawable-nodpi/ic_lh_logo.png"
     },
     {
         "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/xml_file_paths.xml.flat",
         "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/xml/file_paths.xml"
     },
     {
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/font_josefin_sans_bold.ttf.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/font/josefin_sans_bold.ttf"
+    },
+    {
         "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
         "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/mipmap-anydpi-v26/ic_launcher_round.xml"
-    },
-    {
-        "merged": "gr.lhrental.b2b.app-debug-55:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/drawable/ic_launcher_foreground.xml"
-    },
-    {
-        "merged": "gr.lhrental.b2b.app-debug-55:/drawable-nodpi_lh_monogram.png.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/drawable-nodpi/lh_monogram.png"
     },
     {
         "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/mipmap-anydpi-v26_ic_launcher.xml.flat",
         "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "gr.lhrental.b2b.app-debug-55:/font_josefin_sans_semibold.ttf.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/font/josefin_sans_semibold.ttf"
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/font_josefin_sans_semibold.ttf.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/font/josefin_sans_semibold.ttf"
     },
     {
-        "merged": "gr.lhrental.b2b.app-debug-55:/font_josefin_sans_regular.ttf.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/font/josefin_sans_regular.ttf"
-    },
-    {
-        "merged": "gr.lhrental.b2b.app-debug-55:/font_josefin_sans.xml.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/font/josefin_sans.xml"
-    },
-    {
-        "merged": "gr.lhrental.b2b.app-debug-55:/drawable-nodpi_ic_lh_logo.png.flat",
-        "source": "gr.lhrental.b2b.app-main-57:/drawable-nodpi/ic_lh_logo.png"
+        "merged": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-debug-55:/font_josefin_sans.xml.flat",
+        "source": "/Users/vrealm/.gradle/daemon/8.7/gr.lhrental.b2b.app-main-57:/font/josefin_sans.xml"
     }
 ]

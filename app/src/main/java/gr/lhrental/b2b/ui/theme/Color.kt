@@ -2,14 +2,17 @@ package gr.lhrental.b2b.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Matches the live b2b/css/mainv2.css palette — dark slate ink, orange accent.
-val LhInk = Color(0xFF0F172A)
-val LhInkSoft = Color(0xFF475569)
-val LhSurface = Color(0xFFFFFFFF)
-val LhBackground = Color(0xFFF9FAFB)
-val LhBorder = Color(0xFFE5E7EB)
-val LhOrange = Color(0xFFF97316)
-val LhOrangeDark = Color(0xFFEA580C)
-val LhOrangeLight = Color(0xFFFFB37A)
-val LhDanger = Color(0xFFDC2626)
-val LhSuccess = Color(0xFF16A34A)
+// Monochrome by request — no orange. True black/white with a scale of
+// neutral greys for surfaces and borders; red/green stay only as semantic
+// state (error/success), never as decoration.
+val LhBlack = Color(0xFF0A0A0A)
+val LhInk = LhBlack // brand-dark surface (login header, top bars)
+val LhCharcoal = Color(0xFF262626)
+val LhGrey700 = Color(0xFF4D4D4D)
+val LhGrey400 = Color(0xFF9E9E9E)
+val LhGrey200 = Color(0xFFE2E2E2)
+val LhGrey100 = Color(0xFFF2F2F2)
+val LhWhite = Color(0xFFFFFFFF)
+
+val LhDanger = Color(0xFFB3261E)
+val LhSuccess = Color(0xFF2E7D32)

@@ -6,6 +6,7 @@ import gr.lhrental.b2b.data.local.TokenStore
 import gr.lhrental.b2b.data.model.ApiEnvelope
 import gr.lhrental.b2b.data.model.ApiErrorBody
 import gr.lhrental.b2b.data.model.Category
+import gr.lhrental.b2b.data.model.ProductAvailability
 import gr.lhrental.b2b.data.model.CreateOrderRequest
 import gr.lhrental.b2b.data.model.CreatedOrder
 import gr.lhrental.b2b.data.model.Invoice
@@ -53,11 +54,22 @@ class B2bRepository(
     suspend fun categories(): ApiResult<List<Category>> =
         unwrap(safeCall { api.categories(locale) }) { it.categories }
 
-    suspend fun products(categoryId: Int?, query: String?, page: Int): ApiResult<Pair<List<Product>, Pagination>> =
-        unwrap(safeCall { api.products(locale, categoryId, query, page) }) { it.products to it.pagination }
+    suspend fun products(
+        categoryId: Int?,
+        query: String?,
+        page: Int,
+        dates: EventDates?,
+    ): ApiResult<Pair<List<Product>, Pagination>> =
+        unwrap(safeCall {
+            api.products(locale, categoryId, query, page, dateStart = dates?.startIso, dateReturn = dates?.endIso)
+        }) { it.products to it.pagination }
 
-    suspend fun product(id: Int): ApiResult<Product> =
-        unwrap(safeCall { api.product(id, locale) }) { it.product }
+    suspend fun product(id: Int, dates: EventDates?): ApiResult<Product> =
+        unwrap(safeCall { api.product(id, locale, dates?.startIso, dates?.endIso) }) { it.product }
+
+    /** Bulk re-check, e.g. right before checkout or after the customer edits the event dates. */
+    suspend fun checkAvailability(productIds: List<Int>, dates: EventDates): ApiResult<List<ProductAvailability>> =
+        unwrap(safeCall { api.availability(productIds.joinToString(","), dates.startIso, dates.endIso) }) { it.availability }
 
     suspend fun orders(): ApiResult<List<OrderSummary>> =
         unwrap(safeCall { api.orders() }) { it.orders }

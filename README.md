@@ -5,6 +5,18 @@ furniture/event-equipment rental portal, calling the existing legacy PHP
 backend directly — see [docs/API.md](docs/API.md) for the API contract and
 what's new on the server side vs. what's reused as-is.
 
+## 📲 Install the app
+
+**[⬇ Download the APK](https://github.com/vrealmxr/LHRentalB2B/releases/latest/download/LHRentalB2B-debug.apk)**
+
+On the Android phone: open that link, let it download, then open the file.
+Android will ask to allow installs from this source (Settings will offer a
+direct switch) — allow it once, then Install. This is a debug build, not
+signed for the Play Store, so that prompt is expected.
+
+Every new version is published under [Releases](https://github.com/vrealmxr/LHRentalB2B/releases) —
+the link above always points at the latest one.
+
 ## Status
 
 v0.1.0 — builds and runs. Implemented: login, catalogue browse + search +

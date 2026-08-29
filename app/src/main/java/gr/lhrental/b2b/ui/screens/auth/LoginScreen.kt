@@ -1,9 +1,13 @@
 package gr.lhrental.b2b.ui.screens.auth
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,17 +17,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import gr.lhrental.b2b.R
 import gr.lhrental.b2b.data.repo.B2bRepository
+import gr.lhrental.b2b.ui.theme.LhInk
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 
 @Composable
@@ -33,26 +38,30 @@ fun LoginScreen(
 ) {
     val viewModel: LoginViewModel = viewModel(factory = viewModelFactoryOf { LoginViewModel(repository) })
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = "LH Rental",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary,
-        )
-        Text(
-            text = "B2B",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold,
-        )
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Dark header, matching the site's own navbar — the wordmark is a
+        // white PNG meant to sit on ink, not on a light ground.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.38f)
+                .background(LhInk),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_lh_logo),
+                contentDescription = "LH Rental",
+                modifier = Modifier.size(width = 220.dp, height = 66.dp),
+            )
+        }
 
-        Column(modifier = Modifier.padding(top = 40.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(0.62f)
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
             Text(text = stringResource(R.string.login_title), style = MaterialTheme.typography.titleLarge)
 
             OutlinedTextField(
@@ -90,6 +99,7 @@ fun LoginScreen(
                 enabled = !viewModel.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(48.dp)
                     .padding(top = 20.dp),
             ) {
                 if (viewModel.isLoading) {

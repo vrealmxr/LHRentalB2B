@@ -12,6 +12,13 @@ color lh_success
 color lh_surface
 drawable ic_launcher_background
 drawable ic_launcher_foreground
+drawable ic_lh_logo
+drawable lh_monogram
+font josefin_sans
+font josefin_sans_bold
+font josefin_sans_medium
+font josefin_sans_regular
+font josefin_sans_semibold
 mipmap ic_launcher
 mipmap ic_launcher_round
 string account_invoices

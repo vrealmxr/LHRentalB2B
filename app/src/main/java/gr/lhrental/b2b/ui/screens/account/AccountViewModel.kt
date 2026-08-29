@@ -10,6 +10,7 @@ import gr.lhrental.b2b.data.model.UpdateProfileRequest
 import gr.lhrental.b2b.data.model.User
 import gr.lhrental.b2b.data.repo.ApiResult
 import gr.lhrental.b2b.data.repo.B2bRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -91,7 +92,22 @@ class AccountViewModel(private val repository: B2bRepository) : ViewModel() {
     var passwordChanged by mutableStateOf(false)
         private set
 
+    // ---- biometric unlock preference ----
+    var biometricEnabled by mutableStateOf(false)
+        private set
+
+    // Named differently from the `biometricEnabled` property on purpose — Kotlin's
+    // synthetic JVM accessor for a Boolean var property is also called
+    // setBiometricEnabled(Z), and the two would clash if this kept that name.
+    fun updateBiometricPreference(enabled: Boolean) {
+        biometricEnabled = enabled // optimistic — this is a local DataStore write, not a network call
+        viewModelScope.launch { repository.setBiometricEnabled(enabled) }
+    }
+
     init {
+        viewModelScope.launch {
+            biometricEnabled = repository.biometricEnabledFlow.first()
+        }
         viewModelScope.launch {
             when (val result = repository.me()) {
                 is ApiResult.Success -> user = result.value

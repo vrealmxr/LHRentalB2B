@@ -47,6 +47,9 @@ interface ApiService {
         @Query("per_page") perPage: Int = 24,
         @Query("date_start") dateStart: String? = null,
         @Query("date_return") dateReturn: String? = null,
+        @Query("min_price") minPrice: Double? = null,
+        @Query("max_price") maxPrice: Double? = null,
+        @Query("sort") sort: String? = null,
     ): Response<ApiEnvelope<ProductsData>>
 
     @GET("products/show.php")

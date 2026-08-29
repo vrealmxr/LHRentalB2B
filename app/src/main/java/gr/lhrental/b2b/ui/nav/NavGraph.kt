@@ -1,5 +1,9 @@
 package gr.lhrental.b2b.ui.nav
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -88,7 +92,13 @@ fun LhNavGraph(
                                     Icon(tab.icon, contentDescription = null)
                                 }
                             },
-                            label = { Text(stringResource(tab.label)) },
+                            label = {
+                                Text(
+                                    stringResource(tab.label),
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                )
+                            },
                         )
                     }
                 }
@@ -96,7 +106,14 @@ fun LhNavGraph(
         },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            NavHost(navController = navController, startDestination = startDestination) {
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                enterTransition = { slideInHorizontally(initialOffsetX = { it / 3 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { it / 3 }) + fadeOut() },
+            ) {
                 composable(Destination.Login.route) {
                     LoginScreen(repository = repository, onLoggedIn = {
                         navController.navigate(Destination.Dates.route) {

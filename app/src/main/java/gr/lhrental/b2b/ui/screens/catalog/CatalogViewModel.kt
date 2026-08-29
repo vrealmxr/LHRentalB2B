@@ -10,6 +10,10 @@ import gr.lhrental.b2b.data.model.Product
 import gr.lhrental.b2b.data.repo.ApiResult
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.data.repo.EventDatesStore
+import gr.lhrental.b2b.data.repo.ProductFilters
+import gr.lhrental.b2b.data.repo.SortOption
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class CatalogViewModel(
@@ -39,10 +43,16 @@ class CatalogViewModel(
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    var filters by mutableStateOf(ProductFilters())
+        private set
+    var showFilterSheet by mutableStateOf(false)
+        private set
+
     val eventDates get() = eventDatesStore.dates.value
 
     private var page = 1
     private var totalPages = 1
+    private var searchDebounceJob: Job? = null
 
     init {
         loadCategories()
@@ -64,11 +74,34 @@ class CatalogViewModel(
         loadProducts(reset = true)
     }
 
+    /** Live-filters as you type (debounced) — no separate search button needed. */
     fun onSearchChange(value: String) {
         searchQuery = value
+        searchDebounceJob?.cancel()
+        searchDebounceJob = viewModelScope.launch {
+            delay(400)
+            loadProducts(reset = true)
+        }
     }
 
+    /** Still available for the keyboard's search action / a tap on the search icon — searches immediately. */
     fun submitSearch() {
+        searchDebounceJob?.cancel()
+        loadProducts(reset = true)
+    }
+
+    fun openFilterSheet() { showFilterSheet = true }
+    fun dismissFilterSheet() { showFilterSheet = false }
+
+    fun applyFilters(minPrice: Double?, maxPrice: Double?, sort: SortOption) {
+        filters = ProductFilters(minPrice, maxPrice, sort)
+        showFilterSheet = false
+        loadProducts(reset = true)
+    }
+
+    fun clearFilters() {
+        filters = ProductFilters()
+        showFilterSheet = false
         loadProducts(reset = true)
     }
 
@@ -92,7 +125,7 @@ class CatalogViewModel(
         errorMessage = null
         viewModelScope.launch {
             val query = searchQuery.trim().ifBlank { null }
-            when (val result = repository.products(selectedCategoryId, query, page, eventDates)) {
+            when (val result = repository.products(selectedCategoryId, query, page, eventDates, filters)) {
                 is ApiResult.Success -> {
                     val (items, pagination) = result.value
                     products = if (reset) items else products + items

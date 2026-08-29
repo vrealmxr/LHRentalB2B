@@ -71,7 +71,8 @@ class MainActivity : FragmentActivity() {
 
             lifecycleScope.launch {
                 startLoggedIn = app.tokenStore.tokenFlow.first() != null
-                biometricRequired = startLoggedIn && biometrics.isAvailable()
+                val biometricEnabled = app.tokenStore.biometricEnabledFlow.first()
+                biometricRequired = startLoggedIn && biometricEnabled && biometrics.isAvailable()
                 sessionChecked = true
                 if (biometricRequired) runBiometricGate()
             }

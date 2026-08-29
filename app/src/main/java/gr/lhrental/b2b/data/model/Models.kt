@@ -131,6 +131,8 @@ data class Product(
      * unknown", never "unlimited".
      */
     @Json(name = "available_quantity") val availableQuantity: Int? = null,
+    /** A direct .glb URL when this product has a 3D scan, else null — see AR button on the detail screen. */
+    @Json(name = "model_3d_url") val model3dUrl: String? = null,
 ) {
     /** The price the customer actually pays — outlet price when the item is on outlet. */
     val effectivePrice: Double get() = if (onOutlet && outletPrice != null) outletPrice else price

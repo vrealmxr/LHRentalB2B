@@ -25,9 +25,28 @@ private const val ALLOWED_AUTHENTICATORS = BIOMETRIC_STRONG or DEVICE_CREDENTIAL
  */
 class BiometricAuthenticator(private val activity: FragmentActivity) {
 
-    fun isAvailable(): Boolean {
-        return BiometricManager.from(activity).canAuthenticate(ALLOWED_AUTHENTICATORS) ==
-            BiometricManager.BIOMETRIC_SUCCESS
+    fun isAvailable(): Boolean = availabilityReason() == null
+
+    /**
+     * Null when available; otherwise a user-facing reason it isn't, so the
+     * account-screen toggle can explain itself instead of just doing
+     * nothing (which is exactly what was reported: "it's like it doesn't
+     * exist" — canAuthenticate() was quietly failing with no visible signal
+     * anywhere in the app).
+     */
+    fun availabilityReason(): String? {
+        return when (BiometricManager.from(activity).canAuthenticate(ALLOWED_AUTHENTICATORS)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> null
+            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE ->
+                "Η συσκευή δεν έχει αισθητήρα δακτυλικού/προσώπου."
+            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE ->
+                "Ο αισθητήρας δεν είναι διαθέσιμος αυτή τη στιγμή."
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED ->
+                "Δεν έχετε ρυθμίσει κλείδωμα οθόνης (δακτυλικό, πρόσωπο ή PIN) στη συσκευή σας. Ρυθμίστε το πρώτα από τις Ρυθμίσεις της συσκευής."
+            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED ->
+                "Χρειάζεται ενημέρωση ασφαλείας στη συσκευή για να λειτουργήσει."
+            else -> "Μη διαθέσιμο σε αυτή τη συσκευή."
+        }
     }
 
     suspend fun authenticate(title: String, subtitle: String): BiometricOutcome = suspendCancellableCoroutine { cont ->

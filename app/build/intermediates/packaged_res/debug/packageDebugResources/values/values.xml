@@ -35,7 +35,7 @@
     <string name="login_submit">Είσοδος</string>
     <string name="login_title">Σύνδεση</string>
     <string name="login_username">Όνομα χρήστη</string>
-    <string name="nav_account">Λογαριασμός</string>
+    <string name="nav_account">Προφίλ</string>
     <string name="nav_cart">Καλάθι</string>
     <string name="nav_catalog">Κατάλογος</string>
     <string name="nav_orders">Παραγγελίες</string>

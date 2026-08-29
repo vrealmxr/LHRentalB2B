@@ -19,11 +19,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,12 +39,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import gr.lhrental.b2b.R
+import gr.lhrental.b2b.data.local.BiometricAuthenticator
+import gr.lhrental.b2b.data.local.BiometricOutcome
 import gr.lhrental.b2b.data.model.Invoice
 import gr.lhrental.b2b.data.model.User
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +58,10 @@ fun AccountScreen(
 ) {
     val viewModel: AccountViewModel = viewModel(factory = viewModelFactoryOf { AccountViewModel(repository) })
     val context = LocalContext.current
+    val activity = context as FragmentActivity
+    val biometrics = remember { BiometricAuthenticator(activity) }
+    val coroutineScope = rememberCoroutineScope()
+    var biometricToggleError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(viewModel.loggedOut) {
         if (viewModel.loggedOut) onLoggedOut()
@@ -112,7 +126,61 @@ fun AccountScreen(
                 TextButton(onClick = viewModel::openChangePassword, modifier = Modifier.padding(top = 4.dp)) {
                     Text("Αλλαγή κωδικού πρόσβασης")
                 }
-                HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 20.dp))
+
+                HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 16.dp))
+                Text("Ασφάλεια", style = MaterialTheme.typography.titleMedium)
+
+                val unavailableReason = biometrics.availabilityReason()
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                        Text("Βιομετρικό ξεκλείδωμα", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Δακτυλικό, πρόσωπο ή PIN αντί για κωδικό κάθε φορά που ανοίγετε την εφαρμογή.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = viewModel.biometricEnabled,
+                        enabled = unavailableReason == null,
+                        onCheckedChange = { turnOn ->
+                            if (!turnOn) {
+                                viewModel.updateBiometricPreference(false)
+                            } else {
+                                // Confirm it actually works on this device before persisting —
+                                // otherwise "enabled" could lock the customer out on next launch.
+                                coroutineScope.launch {
+                                    when (val outcome = biometrics.authenticate(
+                                        title = "Ενεργοποίηση βιομετρικού ξεκλειδώματος",
+                                        subtitle = "Επιβεβαιώστε για να το ενεργοποιήσετε",
+                                    )) {
+                                        is BiometricOutcome.Success -> {
+                                            biometricToggleError = null
+                                            viewModel.updateBiometricPreference(true)
+                                        }
+                                        is BiometricOutcome.Failed -> {
+                                            if (!outcome.cancelled) biometricToggleError = outcome.message
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+                (unavailableReason ?: biometricToggleError)?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (unavailableReason != null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(top = 20.dp, bottom = 20.dp))
                 Text(stringResource(R.string.account_invoices), style = MaterialTheme.typography.titleMedium)
             }
 

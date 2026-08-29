@@ -11,22 +11,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,24 +43,34 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import gr.lhrental.b2b.R
 import gr.lhrental.b2b.data.model.Category
 import gr.lhrental.b2b.data.model.Product
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.data.repo.EventDates
 import gr.lhrental.b2b.data.repo.EventDatesStore
+import gr.lhrental.b2b.data.repo.ProductFilters
+import gr.lhrental.b2b.data.repo.SortOption
 import gr.lhrental.b2b.ui.theme.LhInk
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 import java.time.format.DateTimeFormatter
@@ -59,7 +78,7 @@ import java.util.Locale
 
 private val bannerFormatter = DateTimeFormatter.ofPattern("d MMM", Locale("el", "GR"))
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun CatalogScreen(
     repository: B2bRepository,
@@ -91,16 +110,40 @@ fun CatalogScreen(
                 EventDatesBanner(dates = dates, onEdit = onEditDates)
             }
 
-            OutlinedTextField(
-                value = viewModel.searchQuery,
-                onValueChange = viewModel::onSearchChange,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                placeholder = { Text(stringResource(R.string.catalog_search_hint)) },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                OutlinedTextField(
+                    value = viewModel.searchQuery,
+                    onValueChange = viewModel::onSearchChange,
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    placeholder = { Text(stringResource(R.string.catalog_search_hint)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { viewModel.submitSearch() }),
+                    modifier = Modifier.weight(1f),
+                )
+                Box {
+                    IconButton(onClick = viewModel::openFilterSheet, modifier = Modifier.padding(start = 4.dp)) {
+                        Icon(
+                            Icons.Default.FilterList,
+                            contentDescription = "Φίλτρα",
+                            tint = if (viewModel.filters.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (viewModel.filters.isActive) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .align(Alignment.TopEnd)
+                                .clip(CircleShape),
+                        ) {
+                            Surface(color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxSize()) {}
+                        }
+                    }
+                }
+            }
 
             if (viewModel.filterableCategories.isNotEmpty()) {
                 CategoryChipsRow(
@@ -128,7 +171,11 @@ fun CatalogScreen(
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         items(viewModel.products, key = { it.id }) { product ->
-                            ProductCard(product = product, onClick = { onProductClick(product) })
+                            ProductCard(
+                                product = product,
+                                onClick = { onProductClick(product) },
+                                modifier = Modifier.animateItemPlacement(),
+                            )
                         }
                     }
                 }
@@ -136,6 +183,78 @@ fun CatalogScreen(
                 if (viewModel.isLoading && viewModel.products.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+            }
+        }
+    }
+
+    if (viewModel.showFilterSheet) {
+        FilterSheet(
+            current = viewModel.filters,
+            onDismiss = viewModel::dismissFilterSheet,
+            onApply = viewModel::applyFilters,
+            onClear = viewModel::clearFilters,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterSheet(
+    current: ProductFilters,
+    onDismiss: () -> Unit,
+    onApply: (Double?, Double?, SortOption) -> Unit,
+    onClear: () -> Unit,
+) {
+    var minPrice by remember { mutableStateOf(current.minPrice?.toInt()?.toString().orEmpty()) }
+    var maxPrice by remember { mutableStateOf(current.maxPrice?.toInt()?.toString().orEmpty()) }
+    var sort by remember { mutableStateOf(current.sort) }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 32.dp)) {
+            Text("Φίλτρα & ταξινόμηση", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+
+            Text("Εύρος τιμής (€)", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 20.dp, bottom = 8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = minPrice,
+                    onValueChange = { minPrice = it.filter(Char::isDigit) },
+                    label = { Text("Από") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinedTextField(
+                    value = maxPrice,
+                    onValueChange = { maxPrice = it.filter(Char::isDigit) },
+                    label = { Text("Έως") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
+            Text("Ταξινόμηση", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 20.dp, bottom = 8.dp))
+            Column {
+                SortOption.entries.forEach { option ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .padding(vertical = 4.dp),
+                    ) {
+                        RadioButton(selected = sort == option, onClick = { sort = option })
+                        Text(option.label, modifier = Modifier.padding(start = 4.dp))
+                    }
+                }
+            }
+
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                TextButton(onClick = onClear, modifier = Modifier.weight(1f)) { Text("Καθαρισμός") }
+                Button(
+                    onClick = { onApply(minPrice.toDoubleOrNull(), maxPrice.toDoubleOrNull(), sort) },
+                    modifier = Modifier.weight(1f),
+                ) { Text("Εφαρμογή") }
             }
         }
     }
@@ -195,18 +314,22 @@ private fun CategoryChipsRow(
 }
 
 @Composable
-private fun ProductCard(product: Product, onClick: () -> Unit) {
+private fun ProductCard(product: Product, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val soldOut = product.availableQuantity == 0
+    val context = LocalContext.current
     Card(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .alpha(if (soldOut) 0.55f else 1f),
     ) {
         Column {
             Box {
                 AsyncImage(
-                    model = product.imageUrl,
+                    model = ImageRequest.Builder(context)
+                        .data(product.imageUrl)
+                        .crossfade(250)
+                        .build(),
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

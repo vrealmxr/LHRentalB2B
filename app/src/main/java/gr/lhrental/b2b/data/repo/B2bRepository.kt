@@ -61,9 +61,20 @@ class B2bRepository(
         query: String?,
         page: Int,
         dates: EventDates?,
+        filters: ProductFilters = ProductFilters(),
     ): ApiResult<Pair<List<Product>, Pagination>> =
         unwrap(safeCall {
-            api.products(locale, categoryId, query, page, dateStart = dates?.startIso, dateReturn = dates?.endIso)
+            api.products(
+                lang = locale,
+                categoryId = categoryId,
+                query = query,
+                page = page,
+                dateStart = dates?.startIso,
+                dateReturn = dates?.endIso,
+                minPrice = filters.minPrice,
+                maxPrice = filters.maxPrice,
+                sort = filters.sort.apiValue,
+            )
         }) { it.products to it.pagination }
 
     suspend fun product(id: Int, dates: EventDates?): ApiResult<Product> =
@@ -118,6 +129,11 @@ class B2bRepository(
 
     /** Reactive session state — collect to know when the user is logged in. */
     val tokenFlow get() = tokenStore.tokenFlow
+
+    /** Whether the customer has opted in to biometric unlock on this device. */
+    val biometricEnabledFlow get() = tokenStore.biometricEnabledFlow
+
+    suspend fun setBiometricEnabled(enabled: Boolean) = tokenStore.setBiometricEnabled(enabled)
 
     // ---- plumbing -----------------------------------------------------
 

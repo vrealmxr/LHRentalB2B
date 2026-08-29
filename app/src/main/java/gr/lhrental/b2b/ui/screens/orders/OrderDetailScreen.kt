@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import gr.lhrental.b2b.data.model.OrderLineItem
@@ -188,8 +189,8 @@ private fun InfoLine(label: String, value: String) {
 @Composable
 private fun OrderItemRow(item: OrderLineItem) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column {
-            Text(item.name, fontWeight = FontWeight.Medium)
+        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+            Text(item.name, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text("${item.quantity} × ${item.unitPrice} €", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Text("${item.lineTotal} €")

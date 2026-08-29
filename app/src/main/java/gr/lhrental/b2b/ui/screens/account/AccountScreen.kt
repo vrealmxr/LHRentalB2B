@@ -87,6 +87,12 @@ fun AccountScreen(
                         text = user?.companyName?.takeIf { it.isNotBlank() } ?: user?.username.orEmpty(),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        // Without this, a long company name (unweighted, measured before its
+                        // sibling) can leave the button almost no width, forcing its label to
+                        // wrap one letter per line — see the screenshot that reported this.
+                        modifier = Modifier.weight(1f).padding(end = 8.dp),
                     )
                     if (!viewModel.isEditing) {
                         TextButton(onClick = viewModel::startEditing) { Text("Επεξεργασία") }
@@ -163,11 +169,20 @@ private fun ProfileDetails(user: User) {
 @Composable
 private fun DetailRow(label: String, value: String?) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 12.dp),
+        )
         Text(
             value?.takeIf { it.isNotBlank() } ?: "—",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
+            textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            maxLines = 2,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -280,8 +295,8 @@ private fun InvoiceRow(invoice: Invoice, isDownloading: Boolean, onDownload: () 
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column {
-            Text(invoice.fileName)
+        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+            Text(invoice.fileName, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             Text(invoice.dateUploaded, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (isDownloading) {

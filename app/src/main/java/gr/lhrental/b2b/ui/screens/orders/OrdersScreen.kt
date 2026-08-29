@@ -61,8 +61,19 @@ fun OrdersScreen(
 private fun OrderCard(order: OrderSummary, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
         Column(modifier = Modifier.padding(14.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(order.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    order.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                )
                 StageBadge(order.stage)
             }
             Text("${order.dateStart ?: "—"} → ${order.dateReturn ?: "—"}", style = MaterialTheme.typography.bodyMedium)

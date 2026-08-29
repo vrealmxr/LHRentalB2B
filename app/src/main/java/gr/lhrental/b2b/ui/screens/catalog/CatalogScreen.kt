@@ -151,7 +151,7 @@ private fun EventDatesBanner(dates: EventDates, onEdit: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                 Icon(
                     Icons.Default.DateRange,
                     contentDescription = null,
@@ -161,6 +161,8 @@ private fun EventDatesBanner(dates: EventDates, onEdit: () -> Unit) {
                 Text(
                     text = "${dates.start.format(bannerFormatter)} – ${dates.end.format(bannerFormatter)}",
                     style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }

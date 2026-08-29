@@ -1,8 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 }
+
+// Release signing lives OUTSIDE the repo on purpose — see docs/RELEASE.md.
+// Missing file just means `assembleRelease`/`bundleRelease` can't run yet;
+// debug builds are unaffected.
+val releaseKeystoreProperties = Properties().apply {
+    val propsFile = file("${System.getProperty("user.home")}/keystores/lhrentalb2b-release.keystore.properties")
+    if (propsFile.exists()) {
+        propsFile.inputStream().use { load(it) }
+    }
+}
+val hasReleaseSigning = releaseKeystoreProperties.getProperty("storeFile") != null
 
 android {
     namespace = "gr.lhrental.b2b"
@@ -19,10 +32,24 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"https://lhrental.gr/b2b/api/\"")
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseKeystoreProperties.getProperty("storeFile"))
+                storePassword = releaseKeystoreProperties.getProperty("storePassword")
+                keyAlias = releaseKeystoreProperties.getProperty("keyAlias")
+                keyPassword = releaseKeystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isDebuggable = true

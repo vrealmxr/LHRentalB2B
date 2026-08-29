@@ -35,6 +35,7 @@ import gr.lhrental.b2b.R
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.data.repo.CartStore
 import gr.lhrental.b2b.data.repo.EventDatesStore
+import gr.lhrental.b2b.ui.theme.lhTextFieldColors
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -70,9 +71,9 @@ fun CheckoutScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                         Column {
-                            Text("Ημερομηνίες εκδήλωσης", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Ημερομηνίες εκδήλωσης", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
                             Text(
                                 "${dates.start.format(formatter)} → ${dates.end.format(formatter)}",
                                 style = MaterialTheme.typography.titleMedium,
@@ -122,6 +123,7 @@ private fun LabeledField(
         onValueChange = onChange,
         label = { Text(label) },
         singleLine = true,
+        colors = lhTextFieldColors(),
         modifier = modifier.fillMaxWidth().padding(top = 10.dp),
     )
 }

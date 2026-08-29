@@ -181,7 +181,7 @@ private fun StageDot(filled: Boolean, color: Color, inactiveColor: Color) {
 @Composable
 private fun InfoLine(label: String, value: String) {
     Column {
-        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
         Text(value, style = MaterialTheme.typography.bodyLarge)
     }
 }
@@ -191,7 +191,7 @@ private fun OrderItemRow(item: OrderLineItem) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
             Text(item.name, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text("${item.quantity} × ${item.unitPrice} €", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("${item.quantity} × ${item.unitPrice} €", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
         }
         Text("${item.lineTotal} €")
     }
@@ -200,7 +200,7 @@ private fun OrderItemRow(item: OrderLineItem) {
 @Composable
 private fun SummaryRow(label: String, amount: Double) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(label, color = MaterialTheme.colorScheme.onSurface)
         Text("$amount €")
     }
 }

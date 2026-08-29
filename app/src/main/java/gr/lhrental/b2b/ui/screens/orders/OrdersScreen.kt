@@ -78,25 +78,42 @@ private fun OrderCard(order: OrderSummary, onClick: () -> Unit) {
             }
             Text("${order.dateStart ?: "—"} → ${order.dateReturn ?: "—"}", style = MaterialTheme.typography.bodyMedium)
             order.location?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
 }
 
+/**
+ * No spare hue to signal "stage" with (monochrome palette, and the label text
+ * itself already says which stage it is) — so completed orders get a solid
+ * ink-filled badge and the two in-progress stages get an outlined one. Two
+ * clearly different weights, still pure black/white, nothing grey.
+ */
 @Composable
 fun StageBadge(stage: Int) {
-    val color = when (stage) {
-        2 -> MaterialTheme.colorScheme.primary
-        1 -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Surface(color = color.copy(alpha = 0.12f), shape = RoundedCornerShape(6.dp)) {
-        Text(
-            text = orderStageLabel(stage),
-            color = color,
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
+    val shape = RoundedCornerShape(6.dp)
+    if (stage >= 2) {
+        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = shape) {
+            Text(
+                text = orderStageLabel(stage),
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            )
+        }
+    } else {
+        Surface(
+            color = androidx.compose.ui.graphics.Color.Transparent,
+            shape = shape,
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
+        ) {
+            Text(
+                text = orderStageLabel(stage),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            )
+        }
     }
 }

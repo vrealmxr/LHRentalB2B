@@ -81,7 +81,7 @@ fun DatesScreen(
             Text(
                 "Επιλέξτε πότε χρειάζεστε τον εξοπλισμό — έτσι θα βλέπετε πραγματική διαθεσιμότητα σε κάθε προϊόν, όχι απλά το συνολικό απόθεμα.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = 8.dp, bottom = 28.dp),
             )
 
@@ -91,7 +91,7 @@ fun DatesScreen(
                 onClick = { pickerTarget = DateTarget.START },
             )
             Box(modifier = Modifier.padding(vertical = 10.dp)) {
-                Text("έως", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("έως", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
             DateCard(
                 label = "Επιστροφή",
@@ -162,14 +162,14 @@ private fun DateCard(label: String, date: LocalDate?, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column {
-                Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
                 Text(
                     text = date?.format(displayFormatter) ?: "Επιλέξτε ημερομηνία",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                 )
             }
-            Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

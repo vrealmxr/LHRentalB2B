@@ -25,8 +25,8 @@ android {
         applicationId = "gr.lhrental.b2b"
         minSdk = 26
         targetSdk = 34
-        versionCode = 10
-        versionName = "0.5.3"
+        versionCode = 11
+        versionName = "0.5.4"
 
         // Base URL of the b2b API — see docs/API.md. Overridable per build type below.
         buildConfigField("String", "API_BASE_URL", "\"https://lhrental.gr/b2b/api/\"")

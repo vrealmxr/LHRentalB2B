@@ -72,6 +72,7 @@ import gr.lhrental.b2b.data.repo.EventDatesStore
 import gr.lhrental.b2b.data.repo.ProductFilters
 import gr.lhrental.b2b.data.repo.SortOption
 import gr.lhrental.b2b.ui.theme.LhInk
+import gr.lhrental.b2b.ui.theme.lhTextFieldColors
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -122,6 +123,7 @@ fun CatalogScreen(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { viewModel.submitSearch() }),
+                    colors = lhTextFieldColors(),
                     modifier = Modifier.weight(1f),
                 )
                 Box {
@@ -129,7 +131,7 @@ fun CatalogScreen(
                         Icon(
                             Icons.Default.FilterList,
                             contentDescription = "Φίλτρα",
-                            tint = if (viewModel.filters.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                     if (viewModel.filters.isActive) {
@@ -160,7 +162,7 @@ fun CatalogScreen(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(24.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 } else {
                     LazyVerticalGrid(
@@ -221,6 +223,7 @@ private fun FilterSheet(
                     label = { Text("Από") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = lhTextFieldColors(),
                     modifier = Modifier.weight(1f),
                 )
                 OutlinedTextField(
@@ -229,6 +232,7 @@ private fun FilterSheet(
                     label = { Text("Έως") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = lhTextFieldColors(),
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -262,7 +266,9 @@ private fun FilterSheet(
 
 @Composable
 private fun EventDatesBanner(dates: EventDates, onEdit: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
+    // Solid ink/paper banner (inverse of the page) instead of a grey fill —
+    // keeps the "active info" bar high-contrast black/white, not muted grey.
+    Surface(color = MaterialTheme.colorScheme.inverseSurface) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -275,17 +281,21 @@ private fun EventDatesBanner(dates: EventDates, onEdit: () -> Unit) {
                     Icons.Default.DateRange,
                     contentDescription = null,
                     modifier = Modifier.height(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.inverseOnSurface,
                 )
                 Text(
                     text = "${dates.start.format(bannerFormatter)} – ${dates.end.format(bannerFormatter)}",
                     style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
-            TextButton(onClick = onEdit) { Text("Αλλαγή") }
+            TextButton(
+                onClick = onEdit,
+                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.inverseOnSurface),
+            ) { Text("Αλλαγή") }
         }
     }
 }
@@ -383,7 +393,7 @@ private fun ProductCard(product: Product, onClick: () -> Unit, modifier: Modifie
                         Text(
                             text = "$available διαθ.",
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }

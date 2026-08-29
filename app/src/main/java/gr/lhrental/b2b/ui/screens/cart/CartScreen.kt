@@ -83,7 +83,7 @@ fun CartScreen(
                     Text(
                         text = stringResource(R.string.cart_empty),
                         modifier = Modifier.align(Alignment.Center).padding(24.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 } else {
                     LazyColumn(contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)) {
@@ -107,23 +107,28 @@ fun CartScreen(
 
 @Composable
 private fun EventDatesRow(dates: EventDates, onEdit: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
+    // Same solid ink/paper treatment as the catalog's dates banner — not grey.
+    Surface(color = MaterialTheme.colorScheme.inverseSurface) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.height(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.height(18.dp), tint = MaterialTheme.colorScheme.inverseOnSurface)
                 Text(
                     "${dates.start.format(bannerFormatter)} – ${dates.end.format(bannerFormatter)}",
                     style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
-            TextButton(onClick = onEdit) { Text("Αλλαγή") }
+            TextButton(
+                onClick = onEdit,
+                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.inverseOnSurface),
+            ) { Text("Αλλαγή") }
         }
     }
 }
@@ -140,7 +145,7 @@ private fun CartLineCard(line: CartLine, onIncrement: () -> Unit, onDecrement: (
             )
             Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
                 Text(line.product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Text("${line.product.effectivePrice} €", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("${line.product.effectivePrice} €", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
             OutlinedButton(onClick = onDecrement) { Text("−") }
             Text(line.quantity.toString(), modifier = Modifier.padding(horizontal = 10.dp))

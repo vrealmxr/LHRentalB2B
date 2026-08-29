@@ -14,9 +14,12 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -70,7 +74,14 @@ fun LhNavGraph(
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                // A hairline stands in for the tonal-elevation shadow Material would
+                // otherwise use to separate the bar from the page — separation without
+                // tinting the bar itself grey.
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp,
+                ) {
                     val cartCount by cartStore.lines.collectAsState()
                     bottomTabs.forEach { tab ->
                         val selected = currentRoute?.hierarchy?.any { it.route == tab.destination.route } == true
@@ -99,6 +110,17 @@ fun LhNavGraph(
                                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                 )
                             },
+                            // Material's defaults dim the unselected 3-of-4 tabs to
+                            // onSurfaceVariant grey — that reads as "the whole bar is
+                            // grey" at a glance. Selection is shown by the pill behind
+                            // the icon instead, so unselected tabs stay full black/white.
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+                            ),
                         )
                     }
                 }

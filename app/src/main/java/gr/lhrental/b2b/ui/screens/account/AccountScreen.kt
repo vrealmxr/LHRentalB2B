@@ -47,6 +47,7 @@ import gr.lhrental.b2b.data.local.BiometricOutcome
 import gr.lhrental.b2b.data.model.Invoice
 import gr.lhrental.b2b.data.model.User
 import gr.lhrental.b2b.data.repo.B2bRepository
+import gr.lhrental.b2b.ui.theme.lhTextFieldColors
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 import kotlinx.coroutines.launch
 
@@ -141,7 +142,7 @@ fun AccountScreen(
                         Text(
                             "Δακτυλικό, πρόσωπο ή PIN αντί για κωδικό κάθε φορά που ανοίγετε την εφαρμογή.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                     Switch(
@@ -188,7 +189,7 @@ fun AccountScreen(
                 item {
                     Text(
                         "Δεν υπάρχουν τιμολόγια.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
@@ -240,7 +241,7 @@ private fun DetailRow(label: String, value: String?) {
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(end = 12.dp),
         )
         Text(
@@ -296,6 +297,7 @@ private fun FormField(
         label = { Text(label) },
         singleLine = true,
         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = keyboardType),
+        colors = lhTextFieldColors(),
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
     )
 }
@@ -316,6 +318,7 @@ private fun ChangePasswordDialog(viewModel: AccountViewModel) {
                         label = { Text("Τρέχων κωδικός") },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
+                        colors = lhTextFieldColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
@@ -324,6 +327,7 @@ private fun ChangePasswordDialog(viewModel: AccountViewModel) {
                         label = { Text("Νέος κωδικός") },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
+                        colors = lhTextFieldColors(),
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     )
                     OutlinedTextField(
@@ -332,6 +336,7 @@ private fun ChangePasswordDialog(viewModel: AccountViewModel) {
                         label = { Text("Επιβεβαίωση νέου κωδικού") },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
+                        colors = lhTextFieldColors(),
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     )
                     viewModel.passwordError?.let {
@@ -365,7 +370,7 @@ private fun InvoiceRow(invoice: Invoice, isDownloading: Boolean, onDownload: () 
     ) {
         Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
             Text(invoice.fileName, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            Text(invoice.dateUploaded, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(invoice.dateUploaded, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
         }
         if (isDownloading) {
             CircularProgressIndicator(modifier = Modifier.padding(8.dp))

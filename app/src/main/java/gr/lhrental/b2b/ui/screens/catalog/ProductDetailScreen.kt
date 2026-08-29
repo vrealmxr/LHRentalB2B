@@ -104,7 +104,7 @@ fun ProductDetailScreen(
                                 Text(
                                     text = if (available > 0) "$available διαθέσιμα για τις επιλεγμένες ημερομηνίες" else "Μη διαθέσιμο για τις επιλεγμένες ημερομηνίες",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = if (available > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                                    color = if (available > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
                                     modifier = Modifier.padding(top = 6.dp),
                                 )
                             }

@@ -41,6 +41,7 @@ import gr.lhrental.b2b.data.local.BiometricAuthenticator
 import gr.lhrental.b2b.data.local.BiometricOutcome
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.ui.theme.LhInk
+import gr.lhrental.b2b.ui.theme.lhTextFieldColors
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -101,6 +102,7 @@ fun LoginScreen(
                 onValueChange = viewModel::onUsernameChange,
                 label = { Text(stringResource(R.string.login_username)) },
                 singleLine = true,
+                colors = lhTextFieldColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
@@ -113,6 +115,7 @@ fun LoginScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                colors = lhTextFieldColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),

@@ -17,6 +17,18 @@ data class ApiError(
     val message: String,
 )
 
+/**
+ * Shape used to parse a FAILED response's body (Retrofit only auto-converts
+ * response.body() for 2xx — an error response has to be read from
+ * response.errorBody() and parsed with this instead). Ignores `data`, which
+ * is absent/null on every error response anyway.
+ */
+@JsonClass(generateAdapter = true)
+data class ApiErrorBody(
+    val ok: Boolean = false,
+    val error: ApiError? = null,
+)
+
 @JsonClass(generateAdapter = true)
 data class LoginData(
     val token: String,

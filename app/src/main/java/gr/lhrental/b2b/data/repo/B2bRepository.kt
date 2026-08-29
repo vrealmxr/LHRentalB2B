@@ -1,7 +1,10 @@
 package gr.lhrental.b2b.data.repo
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import gr.lhrental.b2b.data.local.TokenStore
 import gr.lhrental.b2b.data.model.ApiEnvelope
+import gr.lhrental.b2b.data.model.ApiErrorBody
 import gr.lhrental.b2b.data.model.Category
 import gr.lhrental.b2b.data.model.CreateOrderRequest
 import gr.lhrental.b2b.data.model.CreatedOrder
@@ -106,16 +109,39 @@ class B2bRepository(
         }
     }
 
+    private val errorBodyAdapter = Moshi.Builder()
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+        .adapter(ApiErrorBody::class.java)
+
+    /**
+     * Retrofit only converts response.body() for 2xx responses — for
+     * anything else (401, 422, 500…) body() is null and the real payload
+     * sits in errorBody(), unparsed. This reads that error body so the
+     * server's actual reason (via friendlyErrorMessage) reaches the user
+     * instead of a bare status code.
+     */
     private fun <T, R> unwrap(response: Response<ApiEnvelope<T>>?, onSuccess: (T) -> R): ApiResult<R> {
         if (response == null) {
             return ApiResult.Failure("Δεν ήταν δυνατή η σύνδεση με τον διακομιστή. Ελέγξτε τη σύνδεσή σας.")
         }
-        val envelope = response.body()
-        if (!response.isSuccessful || envelope == null) {
-            return ApiResult.Failure(envelope?.error?.message ?: "Σφάλμα διακομιστή (${response.code()}).")
+
+        if (!response.isSuccessful) {
+            val errorBody = try {
+                response.errorBody()?.string()?.let { errorBodyAdapter.fromJson(it) }
+            } catch (e: Exception) {
+                null
+            }
+            return ApiResult.Failure(
+                friendlyErrorMessage(errorBody?.error?.code, errorBody?.error?.message, response.code())
+            )
         }
-        if (!envelope.ok || envelope.data == null) {
-            return ApiResult.Failure(envelope.error?.message ?: "Άγνωστο σφάλμα.")
+
+        val envelope = response.body()
+        if (envelope == null || !envelope.ok || envelope.data == null) {
+            return ApiResult.Failure(
+                friendlyErrorMessage(envelope?.error?.code, envelope?.error?.message, response.code())
+            )
         }
         return ApiResult.Success(onSuccess(envelope.data))
     }

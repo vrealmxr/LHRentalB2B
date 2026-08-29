@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -67,7 +68,7 @@ fun CartScreen(
                         Text("Σύνολο", style = MaterialTheme.typography.titleMedium)
                         Text("${cartStore.total} €", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
-                    Button(onClick = onCheckout, modifier = Modifier.fillMaxWidth().height(48.dp).padding(top = 12.dp)) {
+                    Button(onClick = onCheckout, modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).padding(top = 12.dp)) {
                         Text(stringResource(R.string.cart_checkout))
                     }
                 }

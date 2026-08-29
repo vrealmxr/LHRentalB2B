@@ -12,8 +12,8 @@ android {
         applicationId = "gr.lhrental.b2b"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 4
+        versionName = "0.3.0"
 
         // Base URL of the b2b API — see docs/API.md. Overridable per build type below.
         buildConfigField("String", "API_BASE_URL", "\"https://lhrental.gr/b2b/api/\"")
@@ -63,6 +63,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
     implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.fragment:fragment-ktx:1.8.2") // FragmentActivity, required by BiometricPrompt
+    implementation("androidx.biometric:biometric:1.1.0")
 
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")

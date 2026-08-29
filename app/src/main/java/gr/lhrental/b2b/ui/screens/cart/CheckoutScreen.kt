@@ -3,6 +3,7 @@ package gr.lhrental.b2b.ui.screens.cart
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -97,7 +98,7 @@ fun CheckoutScreen(
             Button(
                 onClick = viewModel::submit,
                 enabled = !viewModel.isSubmitting,
-                modifier = Modifier.fillMaxWidth().height(48.dp).padding(top = 16.dp, bottom = 32.dp),
+                modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).padding(top = 16.dp, bottom = 32.dp),
             ) {
                 if (viewModel.isSubmitting) {
                     CircularProgressIndicator(modifier = Modifier.padding(2.dp))

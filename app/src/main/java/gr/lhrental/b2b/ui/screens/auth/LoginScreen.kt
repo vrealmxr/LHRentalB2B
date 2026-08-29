@@ -12,25 +12,38 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import gr.lhrental.b2b.R
+import gr.lhrental.b2b.data.local.BiometricAuthenticator
+import gr.lhrental.b2b.data.local.BiometricOutcome
 import gr.lhrental.b2b.data.repo.B2bRepository
 import gr.lhrental.b2b.ui.theme.LhInk
 import gr.lhrental.b2b.ui.util.viewModelFactoryOf
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -38,6 +51,24 @@ fun LoginScreen(
     onLoggedIn: () -> Unit,
 ) {
     val viewModel: LoginViewModel = viewModel(factory = viewModelFactoryOf { LoginViewModel(repository) })
+    val activity = LocalContext.current as FragmentActivity
+    val biometrics = remember { BiometricAuthenticator(activity) }
+    val coroutineScope = rememberCoroutineScope()
+    var showBiometricOffer by remember { mutableStateOf(false) }
+    var biometricOfferError by remember { mutableStateOf<String?>(null) }
+
+    /** Called right after a successful password login — decides whether to
+     *  offer biometric unlock before actually handing off to onLoggedIn(). */
+    fun afterLogin() {
+        coroutineScope.launch {
+            val alreadyEnabled = repository.biometricEnabledFlow.first()
+            if (!alreadyEnabled && biometrics.isAvailable()) {
+                showBiometricOffer = true
+            } else {
+                onLoggedIn()
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Dark header, matching the site's own navbar — the wordmark is a
@@ -96,7 +127,7 @@ fun LoginScreen(
             }
 
             Button(
-                onClick = { viewModel.submit(onLoggedIn) },
+                onClick = { viewModel.submit(::afterLogin) },
                 enabled = !viewModel.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,5 +141,47 @@ fun LoginScreen(
                 }
             }
         }
+    }
+
+    if (showBiometricOffer) {
+        AlertDialog(
+            onDismissRequest = { showBiometricOffer = false; onLoggedIn() },
+            title = { Text("Βιομετρικό ξεκλείδωμα") },
+            text = {
+                Column {
+                    Text("Θέλετε να χρησιμοποιείτε δακτυλικό αποτύπωμα, πρόσωπο ή PIN αντί για κωδικό την επόμενη φορά που θα ανοίξετε την εφαρμογή;")
+                    biometricOfferError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    coroutineScope.launch {
+                        when (val outcome = biometrics.authenticate(
+                            title = "Ενεργοποίηση βιομετρικού ξεκλειδώματος",
+                            subtitle = "Επιβεβαιώστε για να το ενεργοποιήσετε",
+                        )) {
+                            is BiometricOutcome.Success -> {
+                                repository.setBiometricEnabled(true)
+                                showBiometricOffer = false
+                                onLoggedIn()
+                            }
+                            is BiometricOutcome.Failed -> {
+                                if (!outcome.cancelled) {
+                                    biometricOfferError = outcome.message
+                                } else {
+                                    showBiometricOffer = false
+                                    onLoggedIn()
+                                }
+                            }
+                        }
+                    }
+                }) { Text("Ναι, ενεργοποίηση") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBiometricOffer = false; onLoggedIn() }) { Text("Όχι τώρα") }
+            },
+        )
     }
 }

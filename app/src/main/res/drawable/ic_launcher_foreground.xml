@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The "LH" mark cropped from the live site's own logo.png, centered in the
-     adaptive icon's safe zone. Source is a small raster (the site never
-     shipped a vector/high-res logo) — revisit with a proper vector mark if
-     one becomes available. -->
+<!-- The "LH" mark cropped from the live site's own logo.png. ic_launcher_mark
+     is pre-rendered per density bucket (drawable-mdpi..xxxhdpi) with the mark
+     already sized/padded to sit inside the adaptive icon's 66dp safe-zone
+     circle — do NOT swap in a nodpi asset here, that's what clipped the
+     previous version (raw pixels drawn oversized instead of density-scaled).
+     Source is a small raster (the site never shipped a vector/high-res logo)
+     — revisit with a proper vector mark if one becomes available. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:width="60dp"
-        android:height="60dp"
-        android:gravity="center">
+        android:width="108dp"
+        android:height="108dp">
         <bitmap
-            android:src="@drawable/lh_monogram"
-            android:gravity="center" />
+            android:src="@drawable/ic_launcher_mark"
+            android:gravity="fill" />
     </item>
 </layer-list>

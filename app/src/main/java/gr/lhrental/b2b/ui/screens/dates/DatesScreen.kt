@@ -116,12 +116,23 @@ fun DatesScreen(
     }
 
     pickerTarget?.let { target ->
-        val initial = when (target) {
-            DateTarget.START -> viewModel.startDate
-            DateTarget.END -> viewModel.endDate ?: viewModel.startDate
+        val today = LocalDate.now()
+        val initial: LocalDate?
+        val minDate: LocalDate
+        when (target) {
+            DateTarget.START -> {
+                initial = viewModel.startDate
+                minDate = today
+            }
+            DateTarget.END -> {
+                initial = viewModel.endDate ?: viewModel.startDate
+                // Can't return before it was picked up — same-day pickup/return is fine.
+                minDate = viewModel.startDate ?: today
+            }
         }
         DatePickerModal(
             initialDate = initial,
+            minDate = minDate,
             onDismiss = { pickerTarget = null },
             onConfirm = { date ->
                 when (target) {
@@ -167,14 +178,23 @@ private fun DateCard(label: String, date: LocalDate?, onClick: () -> Unit) {
 @Composable
 private fun DatePickerModal(
     initialDate: LocalDate?,
+    minDate: LocalDate,
     onDismiss: () -> Unit,
     onConfirm: (LocalDate) -> Unit,
 ) {
-    val initialMillis = (initialDate ?: LocalDate.now())
-        .atStartOfDay(ZoneOffset.UTC)
-        .toInstant()
-        .toEpochMilli()
-    val state = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+    fun LocalDate.toUtcMillis() = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+
+    val minMillis = minDate.toUtcMillis()
+    // If the previously-picked date is now before the (possibly just-raised)
+    // minimum — e.g. re-opening "return" after moving "pickup" later — start
+    // the calendar on the minimum instead of an now-invalid past selection.
+    val initialMillis = (initialDate ?: minDate).toUtcMillis().coerceAtLeast(minMillis)
+    val selectableDates = remember(minMillis) {
+        object : androidx.compose.material3.SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis >= minMillis
+        }
+    }
+    val state = rememberDatePickerState(initialSelectedDateMillis = initialMillis, selectableDates = selectableDates)
 
     DatePickerDialog(
         onDismissRequest = onDismiss,

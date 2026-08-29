@@ -1,0 +1,160 @@
+package gr.lhrental.b2b.ui.nav
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import gr.lhrental.b2b.R
+import gr.lhrental.b2b.data.repo.B2bRepository
+import gr.lhrental.b2b.data.repo.CartStore
+import gr.lhrental.b2b.ui.screens.account.AccountScreen
+import gr.lhrental.b2b.ui.screens.auth.LoginScreen
+
+private data class BottomTab(val destination: Destination, val label: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+
+private val bottomTabs = listOf(
+    BottomTab(Destination.Catalog, R.string.nav_catalog, Icons.Default.Home),
+    BottomTab(Destination.Cart, R.string.nav_cart, Icons.Default.ShoppingCart),
+    BottomTab(Destination.Orders, R.string.nav_orders, Icons.Default.Receipt),
+    BottomTab(Destination.Account, R.string.nav_account, Icons.Default.Person),
+)
+
+@Composable
+fun LhNavGraph(
+    repository: B2bRepository,
+    cartStore: CartStore,
+    startLoggedIn: Boolean,
+) {
+    val navController = rememberNavController()
+    val startDestination = if (startLoggedIn) Destination.Catalog.route else Destination.Login.route
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination
+    val showBottomBar = bottomTabs.any { currentRoute?.hierarchy?.any { d -> d.route == it.destination.route } == true }
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar {
+                    val cartCount by cartStore.lines.collectAsState()
+                    bottomTabs.forEach { tab ->
+                        val selected = currentRoute?.hierarchy?.any { it.route == tab.destination.route } == true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(tab.destination.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = {
+                                if (tab.destination == Destination.Cart && cartCount.isNotEmpty()) {
+                                    BadgedBox(badge = { Badge { Text(cartCount.sumOf { it.quantity }.toString()) } }) {
+                                        Icon(tab.icon, contentDescription = null)
+                                    }
+                                } else {
+                                    Icon(tab.icon, contentDescription = null)
+                                }
+                            },
+                            label = { Text(stringResource(tab.label)) },
+                        )
+                    }
+                }
+            }
+        },
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            NavHost(navController = navController, startDestination = startDestination) {
+                composable(Destination.Login.route) {
+                    LoginScreen(repository = repository, onLoggedIn = {
+                        navController.navigate(Destination.Catalog.route) {
+                            popUpTo(Destination.Login.route) { inclusive = true }
+                        }
+                    })
+                }
+                composable(Destination.Catalog.route) {
+                    gr.lhrental.b2b.ui.screens.catalog.CatalogScreen(repository = repository) { product ->
+                        navController.navigate(Destination.ProductDetail.of(product.id))
+                    }
+                }
+                composable(
+                    Destination.ProductDetail.route,
+                    arguments = listOf(navArgument("productId") { type = NavType.IntType }),
+                ) { entry ->
+                    val productId = entry.arguments?.getInt("productId") ?: return@composable
+                    gr.lhrental.b2b.ui.screens.catalog.ProductDetailScreen(
+                        repository = repository,
+                        cartStore = cartStore,
+                        productId = productId,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Destination.Cart.route) {
+                    gr.lhrental.b2b.ui.screens.cart.CartScreen(cartStore = cartStore) {
+                        navController.navigate(Destination.Checkout.route)
+                    }
+                }
+                composable(Destination.Checkout.route) {
+                    gr.lhrental.b2b.ui.screens.cart.CheckoutScreen(
+                        repository = repository,
+                        cartStore = cartStore,
+                        onSubmitted = { orderId ->
+                            navController.navigate(Destination.OrderDetail.of(orderId)) {
+                                popUpTo(Destination.Catalog.route)
+                            }
+                        },
+                    )
+                }
+                composable(Destination.Orders.route) {
+                    gr.lhrental.b2b.ui.screens.orders.OrdersScreen(repository = repository) { order ->
+                        navController.navigate(Destination.OrderDetail.of(order.id))
+                    }
+                }
+                composable(
+                    Destination.OrderDetail.route,
+                    arguments = listOf(navArgument("orderId") { type = NavType.IntType }),
+                ) { entry ->
+                    val orderId = entry.arguments?.getInt("orderId") ?: return@composable
+                    gr.lhrental.b2b.ui.screens.orders.OrderDetailScreen(
+                        repository = repository,
+                        orderId = orderId,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Destination.Account.route) {
+                    AccountScreen(repository = repository, onLoggedOut = {
+                        navController.navigate(Destination.Login.route) {
+                            popUpTo(0)
+                        }
+                    })
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lh_background">#F9FAFB</color>
+    <color name="lh_border">#E5E7EB</color>
+    <color name="lh_danger">#DC2626</color>
+    <color name="lh_ink">#0F172A</color>
+    <color name="lh_ink_soft">#475569</color>
+    <color name="lh_orange">#F97316</color>
+    <color name="lh_orange_dark">#EA580C</color>
+    <color name="lh_orange_light">#FFB37A</color>
+    <color name="lh_success">#16A34A</color>
+    <color name="lh_surface">#FFFFFF</color>
+    <string name="account_invoices">Τιμολόγια</string>
+    <string name="account_logout">Αποσύνδεση</string>
+    <string name="account_title">Ο λογαριασμός μου</string>
+    <string name="app_name">LH Rental B2B</string>
+    <string name="cart_checkout">Αίτημα κράτησης</string>
+    <string name="cart_empty">Το καλάθι είναι άδειο.</string>
+    <string name="cart_quantity">Ποσότητα</string>
+    <string name="cart_title">Το καλάθι σας</string>
+    <string name="catalog_empty">Δεν βρέθηκαν προϊόντα.</string>
+    <string name="catalog_search_hint">Αναζήτηση κωδικού προϊόντος</string>
+    <string name="checkout_address">Διεύθυνση παράδοσης</string>
+    <string name="checkout_comments">Σχόλια</string>
+    <string name="checkout_date_return">Ημερομηνία επιστροφής</string>
+    <string name="checkout_date_start">Ημερομηνία παραλαβής</string>
+    <string name="checkout_event_type">Τύπος εκδήλωσης</string>
+    <string name="checkout_location">Τοποθεσία</string>
+    <string name="checkout_postcode">Τ.Κ.</string>
+    <string name="checkout_project_title">Τίτλος εκδήλωσης</string>
+    <string name="checkout_submit">Υποβολή αιτήματος</string>
+    <string name="checkout_success">Το αίτημά σας καταχωρήθηκε.</string>
+    <string name="checkout_title">Στοιχεία εκδήλωσης</string>
+    <string name="checkout_town">Πόλη</string>
+    <string name="login_error_credentials">Λάθος όνομα χρήστη ή κωδικός.</string>
+    <string name="login_error_generic">Κάτι πήγε στραβά. Δοκιμάστε ξανά.</string>
+    <string name="login_password">Κωδικός</string>
+    <string name="login_submit">Είσοδος</string>
+    <string name="login_title">Σύνδεση</string>
+    <string name="login_username">Όνομα χρήστη</string>
+    <string name="nav_account">Λογαριασμός</string>
+    <string name="nav_cart">Καλάθι</string>
+    <string name="nav_catalog">Κατάλογος</string>
+    <string name="nav_orders">Παραγγελίες</string>
+    <string name="order_stage_label">Κατάσταση</string>
+    <string name="orders_empty">Δεν έχετε ακόμα παραγγελίες.</string>
+    <string name="product_add_to_cart">Προσθήκη στο καλάθι</string>
+    <string name="product_price_per_unit">%1$s € / τεμάχιο</string>
+    <style name="Theme.LhRentalB2b" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/lh_ink</item>
+        <item name="android:windowBackground">@color/lh_background</item>
+    </style>
+</resources>
